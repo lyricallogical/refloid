@@ -46,7 +46,7 @@ endf
 fun! s:is_exist_import_impl(namespaces, qualified_name)
   let [lnum, col] = searchpos("import " . a:namespaces . "." . a:qualified_name . ";")
   if lnum == 0 && col == 0
-    let [lnum, col] = searchpos("import " . a:namespaces . ".*;")
+    let [lnum, col] = searchpos("import " . a:namespaces . ".\\*;")
     if lnum == 0 && col == 0
       return 0
     endif
