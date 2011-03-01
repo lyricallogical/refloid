@@ -43,10 +43,14 @@ fun! s:refroid_cursor()
   call s:refroid(expand("<cword>"))
 endf
 
+fun! s:searchpos(str, ...)
+  return call(function("searchpos"), [escape(a:str, ".*")] + a:000)
+endf
+
 fun! s:is_exist_import_impl(namespaces, qualified_name)
-  let [lnum, col] = searchpos("import " . a:namespaces . "." . a:qualified_name . ";")
+  let [lnum, col] = s:searchpos("import " . join(a:namespaces + [a:qualified_name], ".") . ";")
   if lnum == 0 && col == 0
-    let [lnum, col] = searchpos("import " . a:namespaces . ".\\*;")
+    let [lnum, col] = s:searchpos("import " . join(a:namespaces + ["*"]) . ";")
     if lnum == 0 && col == 0
       return 0
     endif
@@ -62,14 +66,33 @@ fun! s:is_exist_import(namespaces, qualified_name)
   return result
 endf
 
-fun! s:create_append_arg_impl(import)
+fun! s:find_line(namespaces)
+  if empty(a:namespaces)
+    return 0
+  endif
+
+  call cursor(1, 0)
+  let [lnum, col] = s:searchpos("import " . join(a:namespaces + [""], "."), "b")
+  if lnum == 0 && col == 0
+    return s:find_line(a:namespaces[0:-2])
+  endif
+
+  return lnum
+endf
+
+fun! s:create_append_arg_impl(namespaces, import)
+  let lnum = s:find_line(a:namespaces)
+  if lnum > 0
+    return [lnum, a:import]
+  endif
+
   " search last 'import'
   call cursor(1, 0)
-  let [lnum, col] = searchpos("import", "b")
+  let [lnum, col] = s:searchpos("import", "b")
 
   if lnum == 0 && col == 0
     " sarch 'package'
-    let [lnum, col] = searchpos("package")
+    let [lnum, col] = s:searchpos("package")
     if lnum == 0 && col == 0
       return [0, [a:import, ""]]
     endif
@@ -80,9 +103,9 @@ fun! s:create_append_arg_impl(import)
   return [lnum, a:import]
 endf
 
-fun! s:create_append_arg(import)
+fun! s:create_append_arg(namespaces, import)
   let pos = getpos(".")
-  let result = s:create_append_arg_impl(a:import)
+  let result = s:create_append_arg_impl(a:namespaces, a:import)
   call setpos(".", pos)
   return result
 endf
@@ -92,18 +115,16 @@ fun! s:refroid_import(class)
   if empty(selected)
     return
   endif
-  let namespaces = join(split(selected[1], "/"), ".")
+  let namespaces = split(selected[1], "/")
   let qualified_name = selected[2]
 
   if s:is_exist_import(namespaces, qualified_name)
-    echo "already imported"
     return
   endif
 
-  let namespace_path = namespaces . "." . qualified_name . ";"
+  let namespace_path = join(namespaces + [qualified_name], ".") . ";"
   let import = "import " . namespace_path
-  let [lnum, expr] = s:create_append_arg(import)
-  echo [lnum, expr]
+  let [lnum, expr] = s:create_append_arg(namespaces, import)
   call append(lnum, expr)
 endf
 
