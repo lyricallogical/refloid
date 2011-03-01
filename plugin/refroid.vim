@@ -7,7 +7,7 @@ if !exists("g:refroid_browser")
 endif
 
 fun! s:refroid(class)
-  let comm = "ruby ~/.vim/plugin/refroid.rb " . a:class . " " . g:refroid_apilevel
+  let comm = "ruby ~/.vim/ruby/refroid.rb " . a:class . " " . g:refroid_apilevel
   let candidates = split(system(comm), '\n')
   call map(candidates, 'split(v:val)')
   if empty(candidates)
