@@ -47,7 +47,7 @@ fun! s:searchpos(str, ...)
   return call(function("searchpos"), [escape(a:str, ".*")] + a:000)
 endf
 
-fun! s:is_exist_import_impl(namespaces, qualified_name)
+fun! s:is_exist_import(namespaces, qualified_name)
   let [lnum, col] = s:searchpos("import " . join(a:namespaces + [a:qualified_name], ".") . ";")
   if lnum == 0 && col == 0
     let [lnum, col] = s:searchpos("import " . join(a:namespaces + ["*"]) . ";")
@@ -59,9 +59,9 @@ fun! s:is_exist_import_impl(namespaces, qualified_name)
   return 1
 endf
 
-fun! s:is_exist_import(namespaces, qualified_name)
+fun! s:restore_pos_call(fun_name, ...)
   let pos = getpos(".")
-  let result = s:is_exist_import_impl(a:namespaces, a:qualified_name)
+  let result = call(function(a:fun_name), a:000)
   call setpos(".", pos)
   return result
 endf
@@ -80,7 +80,7 @@ fun! s:find_line(namespaces)
   return lnum
 endf
 
-fun! s:create_append_arg_impl(namespaces, import)
+fun! s:create_append_arg(namespaces, import)
   let lnum = s:find_line(a:namespaces)
   if lnum > 0
     return [lnum, a:import]
@@ -103,13 +103,6 @@ fun! s:create_append_arg_impl(namespaces, import)
   return [lnum, a:import]
 endf
 
-fun! s:create_append_arg(namespaces, import)
-  let pos = getpos(".")
-  let result = s:create_append_arg_impl(a:namespaces, a:import)
-  call setpos(".", pos)
-  return result
-endf
-
 fun! s:refroid_import(class)
   let selected = s:refroid_select(a:class)
   if empty(selected)
@@ -118,13 +111,13 @@ fun! s:refroid_import(class)
   let namespaces = split(selected[1], "/")
   let qualified_name = selected[2]
 
-  if s:is_exist_import(namespaces, qualified_name)
+  if s:restore_pos_call("s:is_exist_import", namespaces, qualified_name)
     return
   endif
 
   let namespace_path = join(namespaces + [qualified_name], ".") . ";"
   let import = "import " . namespace_path
-  let [lnum, expr] = s:create_append_arg(namespaces, import)
+  let [lnum, expr] = s:restore_pos_call("s:create_append_arg", namespaces, import)
   call append(lnum, expr)
 endf
 
