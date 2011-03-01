@@ -26,13 +26,11 @@ fun! s:refroid_select(class)
   return candidates[index]
 endf
 
-
 fun! s:refroid(class)
   let selected = s:refroid_select(a:class)
   if empty(selected)
     return
   endif
-  echo selected
   let namespaces = selected[1]
   let qualified_name = selected[2]
   let path = namespaces . "/" . qualified_name . ".html"
