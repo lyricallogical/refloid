@@ -6,7 +6,7 @@ if !exists("g:refroid_browser")
   let g:refroid_browser = "firefox --new-tab"
 endif
 
-fun! s:refroid(class)
+fun! s:refroid_select(class)
   let comm = "ruby ~/.vim/ruby/refroid.rb " . a:class . " " . g:refroid_apilevel
   let candidates = split(system(comm), '\n')
   call map(candidates, 'split(v:val)')
@@ -23,8 +23,21 @@ fun! s:refroid(class)
     return
   endif
 
-  let url_base = "http://developer.android.com/reference"
-  let comm_browser = g:refroid_browser . " " . url_base . candidates[index][1]
+  return candidates[index]
+endf
+
+
+fun! s:refroid(class)
+  let selected = s:refroid_select(a:class)
+  if empty(selected)
+    return
+  endif
+  echo selected
+  let namespaces = selected[1]
+  let qualified_name = selected[2]
+  let path = namespaces . "/" . qualified_name . ".html"
+  let url_base = "http://developer.android.com/reference/"
+  let comm_browser = g:refroid_browser . " " . url_base . path
   call system(comm_browser)
 endf
 
