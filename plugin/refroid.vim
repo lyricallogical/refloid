@@ -91,7 +91,7 @@ fun! s:create_append_arg(namespaces, import)
   let [lnum, col] = s:searchpos("import", "b")
 
   if lnum == 0 && col == 0
-    " sarch 'package'
+    " search 'package'
     let [lnum, col] = s:searchpos("package")
     if lnum == 0 && col == 0
       return [0, [a:import, ""]]
