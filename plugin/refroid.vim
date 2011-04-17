@@ -1,5 +1,5 @@
 if !exists("g:refroid_apilevel")
-  let g:refroid_apilevel = 8
+  let g:refroid_apilevel = 1000
 endif
 
 if !exists("g:refroid_browser")

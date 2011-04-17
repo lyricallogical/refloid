@@ -1,7 +1,7 @@
 require 'pstore'
 exit if ARGV.empty?
 class_name, current_apilevel = ARGV
-current_apilevel ||= 8 # Android 2.2
+current_apilevel ||= 1000
 current_apilevel = current_apilevel.to_i
 table = PStore.new("#{ENV['HOME']}/.vim/ruby/refroid.db").transaction{|db| db[:table] }
 candidates = table[class_name] || table.select{|k,v| k.start_with?(class_name) }.inject([]){|l, r| l + r[1] }
