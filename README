@@ -14,3 +14,7 @@ let g:refroid_browser = "chromium-browser"
 で利用するブラウザの指定ができます。
 デフォルトは "firefox --new-tab" です。
 "screen -X screen w3m" を大変おすすめしません。
+
+nnoremap <C-i> :RefroidImportCursro<CR>
+
+とかでカーソル下のクラスの import 文を挿入してくれます。
